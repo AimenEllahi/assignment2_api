@@ -2,16 +2,19 @@ import Product from "../models/Product.js";
 
 //to get single product
 export const getProduct = async (req,res) =>{
-   const { id} = req.params
+   const { id } = req.params
+   
     try{
-        
-        
+         //check if product exists
+        if (!mongoose.Types.ObjectId.isValid(id))
+        return res.status(404).send("product not found");
+
         const product = await Product.findById(id);
  
-        res.json(product);
+        res.status(200).json(product);
     }
     catch(err){
-        res.json({message: err});
+        res.status(404).json({ message: err});
     }
 }
 
@@ -19,9 +22,9 @@ export const getProduct = async (req,res) =>{
 export const getProducts = async (req,res) =>{
     try{
         const product = await Product.find();
-        res.json(product);
+        res.status(200).json(product);
     } catch(err){
-        res.json({message: err});
+        res.status(404).json({ message: err});
     }
 }
 
@@ -31,13 +34,14 @@ export const createProduct = async (req,res) =>{
     const {title, desc, price} = req.body;
     console.log(title,desc,price);
     const product = new Product({
-        productname: title,
-        desc: desc,
-        productcost: price
+        title,
+         desc,
+         price
     });
    
     try{
         const savedProduct = await product.save()
+
         res.json(savedProduct);
     }
     catch(err) {
@@ -50,14 +54,15 @@ export const updateProduct = async (req,res) =>{
      console.log("We are here")
     const {id} = req.params;
     const {title, desc, price} = req.body;
-    console.log(title,desc,price);
+    console.log(title, desc, price);
 
     try{
-    const updatedProduct = await Product.updateOne({ id },
-        {$set: {productname: title,
-            desc: desc,
-            productcost: price }});
-    res.json(updatedProduct);
+    const updatedProduct = await Product.findByIdAndUpdate(
+        id,
+        { id, title,desc,price },
+        { new: true }
+      );
+    res.json({message: "product successfully updated"});
 } catch(err){
     res.json({message: err});
 }}
@@ -65,8 +70,8 @@ export const updateProduct = async (req,res) =>{
 //to delete product
 export const deleteProduct = async (req,res) =>{
     try{
-        const removedProduct = await Product.deleteOne({ _id: req.params.productID});
-        res.json(removedProduct);
+        const removedProduct = await Product.deleteOne({ _id: req.params.id});
+        res.json({message: "product successfully deleted"});
     } catch(err){
         res.json({message: err});
     }
