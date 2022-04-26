@@ -31,5 +31,5 @@ app.get('/', (req, res) => {
 })
 
 
-
+//listens on port 3001
 app.listen(3001, () => console.log('Server Started'))
